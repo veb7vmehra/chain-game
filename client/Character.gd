@@ -7,10 +7,15 @@ var state = false
 signal moveplayer(x,y,vx,vy,rot)
 var target = Vector2()
 
+signal spot(ray)
+
 func init(ID,x,y):
 	id = ID
 	position.x = x
 	position.y = y
+	$id.text=id
+
+#emit_signal("knife",$RayCast2D.get_collider())
 
 func getID():
 	return id
@@ -64,7 +69,12 @@ func get_input():
 	$RayCast2D.rotation_degrees = $player.rotation_degrees
 	velocity = velocity.normalized() * speed
 	emit_signal("moveplayer",position.x,position.y,velocity.x,velocity.y,$player.rotation)
+	emit_signal("spot",_getCollindingStatus())
 
 func _physics_process(delta):
 	get_input()
 	move_and_slide(velocity)
+	
+func _getCollindingStatus():
+	return $RayCast2D.get_collider()
+	

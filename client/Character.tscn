@@ -563,7 +563,7 @@ animations = [ {
 } ]
 
 [node name="Character" type="KinematicBody2D"]
-position = Vector2( 83.7557, -0.540359 )
+position = Vector2( 90.7557, 9.45964 )
 z_index = 1
 script = ExtResource( 1 )
 __meta__ = {
@@ -590,8 +590,7 @@ cast_to = Vector2( 500, 0 )
 scale = Vector2( 0.2, 0.2 )
 z_index = 2
 frames = SubResource( 2 )
-animation = "shotgun_shoot"
-frame = 2
+animation = "flashlight_idle"
 
 [node name="muzzle" type="Sprite" parent="player"]
 visible = false
@@ -617,3 +616,12 @@ z_index = -1
 frames = SubResource( 3 )
 animation = "walk"
 frame = 3
+
+[node name="id" type="RichTextLabel" parent="."]
+margin_left = -78.0
+margin_top = -60.0
+margin_right = 83.0
+margin_bottom = -20.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

@@ -12,7 +12,7 @@ position = Vector2( 179.692, 362.046 )
 scale = Vector2( 1.00154, 1.03774 )
 texture = ExtResource( 2 )
 
-[node name="TextureButton" type="TextureButton" parent="."]
+[node name="playButton" type="TextureButton" parent="."]
 margin_left = 55.0
 margin_top = 486.0
 margin_right = 300.0
@@ -22,3 +22,4 @@ expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
+[connection signal="pressed" from="playButton" to="." method="_on_playButton_pressed"]

@@ -281,9 +281,9 @@ async def collect(data):
 async def pingpong():
     while True:
         for user in all_user:
-            if not user['ws'].connected:
+            if not all_user[user]['ws'].connected:
                 for room in rooms:
-                    if user in room.keys():
+                    if all_user[user] in room.keys():
                         for u in room.keys():
                             if u != "participant" and u != user:
                                 message = {"action": "removed", "user": user}
@@ -299,29 +299,41 @@ async def coins():
     global rooms
     vals = [5, 7, 9, 11, 13, 15]
     pillars = [1, 2]
-    x = [0, 10]
-    y = [0, 10]
-    for room in rooms:
-        bit = random.choice(vals)
-        pillar = random.choice(pillars)
-        alpha_bit = 2*math.pi*random.random()
-        r_bit = bit * math.sqrt(random.random())
-        x_bit = bit * math.cos(alpha_bit) + x[pillar]
-        y_bit = bit * math.sin(alpha_bit) + y[pillar]
-        x_cur = []
-        y_cur = []
-        for i in range(5):
+    x = [-128, 10]
+    y = [447, 10]
+    while True:
+        for room in rooms:
+            if rooms[room]['participants'] == 0:
+                continue
+            bit = random.choice(vals)
+            pillar = random.choice(pillars)
             alpha_bit = 2*math.pi*random.random()
-            r_bit = bit * math.sqrt(random.random())
-            x_cur.append(bit * math.cos(alpha_bit) + x[pillar])
-            y_cur.append(bit * math.sin(alpha_bit) + y[pillar])
-        message = {"action": "drop", "bit_size": bit, "x_bit": x_bit, "y_bit": y_bit, "x_cur1": x_cur[0], "y_cur1": y_cur[0], "x_cur2": x_cur[1], "y_cur2": y_cur[1], "x_cur3": x_cur[2], "y_cur3": y_cur[2], "x_cur4": x_cur[3], "y_cur4": y_cur[3], "x_cur5": x_cur[4], "y_cur5": y_cur[4]}
-        message = json.dump(message)
-        for key in room.keys():
-            if key != "participants":
-                await room[key]['ws'].send(message)
-    time.sleep(10)
-    coins()
+            x_bit = bit * (1+math.cos(alpha_bit)) / 2
+            y_bit = bit * (1+math.sin(alpha_bit)) / 2
+            x_cur = []
+            y_cur = []
+            for i in range(5):
+                alpha_bit = 2*math.pi*random.random()
+                x_cur.append(bit * (1+math.cos(alpha_bit)) / 2)
+                y_cur.append(bit * (1+math.sin(alpha_bit)) / 2)
+            message = {"action": "drop", "bit_size": bit, "x_bit": x_bit, "y_bit": y_bit, "x_cur1": x_cur[0], "y_cur1": y_cur[0], "x_cur2": x_cur[1], "y_cur2": y_cur[1], "x_cur3": x_cur[2], "y_cur3": y_cur[2], "x_cur4": x_cur[3], "y_cur4": y_cur[3], "x_cur5": x_cur[4], "y_cur5": y_cur[4]}
+            message = json.dumps(message)
+            for key in rooms[room].keys():
+                if key != "participants":
+                    await rooms[room][key]['ws'].send(message)
+        await asyncio.sleep(10)
+
+def coins_callback():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(coins())
+    loop.close()
+
+def ping_callback():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(pingpong())
+    loop.close()
 
 async def counter(websocket, path):
     pID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -366,10 +378,10 @@ async def counter(websocket, path):
 
 start_server = websockets.serve(counter, "localhost", 6789)
 asyncio.get_event_loop().run_until_complete(start_server)
-t = threading.Thread(target=coins)
+t = threading.Thread(target=coins_callback)
 threads.append(t)
 t.start()
-k = threading.Thread(target=pingpong)
+k = threading.Thread(target=ping_callback)
 threads.append(k)
 k.start()
 asyncio.get_event_loop().run_forever()

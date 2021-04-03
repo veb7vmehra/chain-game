@@ -12,6 +12,8 @@ var _client = WebSocketClient.new()
 var code = '0000'
 var team
 var room
+var coins_hand = []
+var bijli_hand = 0
 
 func _ready():
 	_client.connect("connection_closed", self, "_closed")
@@ -25,6 +27,26 @@ func _ready():
 		set_process(false)
 	OS.set_window_size(Vector2(960,540))
 
+var coin = preload("res://coin.tscn")
+var bijli = preload("res://bijli.tscn")
+
+var cc = 0
+var bc = 0
+var coins = []
+var bijlis = []
+var mult = 50
+
+func addCoin(bs,x,y):
+	coins.append([coin.instance(),bs])
+	coins[cc][0].position = Vector2($map/T1.position.x+int(x)*mult,$map/T1.position.y+int(y)*mult)
+	$map/coins.add_child(coins[cc][0])
+	cc += 1
+
+func addBijli(x,y):
+	bijlis.append(bijli.instance())
+	bijlis[bc].position = Vector2($map/T1.position.x+int(x)*mult,$map/T1.position.y+int(y)*mult)
+	$map/bijlis.add_child(bijlis[bc])
+	bc += 1
 
 func _closed(was_clean = false):
 	print("Closed, clean: ", was_clean)
@@ -49,7 +71,6 @@ func _on_data():
 		if data['pID'] == pID:
 			player.move(data['x'],data['y'],data['vx'],data['vy'],data['rot'])
 		else:
-			print(players, player)
 			players[data['pID']].move(data['x'],data['y'],data['vx'],data['vy'],data['rot'])
 	if data['action'] == "joined_room":
 		players[data['joined_room']] = otherPlayers.instance()
@@ -70,21 +91,11 @@ func _on_data():
 		else:
 			players[data['in_room']].init(data['in_room'],get_node("map/F"+data['team']).position.x,get_node("map/F"+data['team']).position.y, data['team'])
 		add_child(players[data['in_room']])
-	if data['action'] == 'join_error':
-		pass #do something you filthy shit
-	if data['action'] == 'ids':
-		$Map1.show()
-		$GUI.hide()
-		add_child(player)
-		player.set_type('knife' if data[pID][0] == '0' else 'handgun')
-		player.init(pID,get_node("Map1/pos_"+data[pID]).position.x,get_node("Map1/pos_"+data[pID]).position.y)
-		#player.init(pID,0,0)
-		for ids in data:
-			if ids != pID  and ids != 'action' and ids[3] != '_':
-				print(ids+" joined for no reason")
-				players[ids].set_type('knife' if data[ids][0] == '0' else 'handgun')
-				players[ids].init(ids,get_node("Map1/pos_"+data[ids]).position.x,get_node("Map1/pos_"+data[ids]).position.y)
-				#players[ids].init(ids,0,0)
+	if data['action'] == 'drop':
+		addCoin(data['bit_size'],data['x_bit'],data['y_bit'])
+		for i in range(5):
+			addBijli(data['x_cur'+str(i+1)],data['y_cur'+str(i+1)])
+		
 	if data['action'] == 'entered_room':
 		player = Player.instance()
 		team=data['team']
@@ -113,8 +124,21 @@ func _respawnSpot(obj):
 		if team != players[other].getTeam():
 			var p1pos = player.getpos()
 			var p2pos = players[other].getpos()
-			var Rdata = JSON.print({"action":"spot","pID":other}).to_utf8()
+			var Rdata = JSON.print({"action":"spot","pID":other,'room':room}).to_utf8()
 			_client.get_peer(1).put_packet(Rdata)
+	else:
+		for i in range(len(coins)):if coins[i][0] == obj: other = i
+		if other!= null:
+			if player.getpos().distance_to(coins[other][0].getpos()) < 10:
+				coins_hand.append(coins[other][1])
+				coins[other][0].hide()
+		else:
+			for i in range(len(bijlis)):if bijlis[i] == obj: other = i
+			if other!= null:
+				if player.getpos().distance_to(bijlis[other].getpos()) < 10:
+					bijli_hand += 1
+					bijlis[other].hide()
+		
 	
 func _moveplayer(x,y,vx,vy,rot):
 	var playerID = player.getID()

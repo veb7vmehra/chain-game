@@ -23,11 +23,11 @@ Hacker’s job is generally to lurk and copy the private key of enemy’s last b
 
 ### 4. MANAGER (one per team)
 Manager is the brain of a team, manager can send fake bits as a trap, can deploy a bot to protect private key from being stolen, can backup a blockchain in case of corrupt, and can can swap his roles with others.
- * **BOT
+ * _BOT_
  When a bot is deployed, it prevents the enemies hacker to steal the private key of a block. Can be used twice in a match with a cooldown of 2 minutes.
  
-* **FAKE BIT
+* _FAKE BIT_
 Fake bits produces a fake data bit with known private key by a manager which enemy’s attacker might confuse with normal data bit and that will waste the enemies time and might even corrupt their blockchain.
 
-* **BACKUP
+* _BACKUP_
 It’s manager’s to regularly backup the blockchain, so that incase of a breach team may not lose many blocks and restore back to the last backed up ledger.

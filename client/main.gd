@@ -23,9 +23,6 @@ func _ready():
 		set_process(false)
 	OS.set_window_size(Vector2(960,540))
 
-func _on_login(user,passw):
-	var data = JSON.print({"action":"login","username":user,"password":passw}).to_utf8()
-	_client.get_peer(1).put_packet(data)
 
 func _closed(was_clean = false):
 	print("Closed, clean: ", was_clean)
@@ -55,12 +52,6 @@ func _on_data():
 		players[data['joined_room']] = otherPlayers.instance()
 		players[data['joined_room']].init(data['joined_room'],0,0)
 		add_child(players[data['joined_room']])
-	if data['action'] == "in_room":
-		players[data['in_room']] = otherPlayers.instance()
-		players[data['in_room']].init(data['in_room'],0, 0)
-		add_child(players[data['in_room']])
-	if data['action'] == 'joined_party':
-		$GUI/players.text += '\n'+data['joined_party']
 	if data['action'] == 'join_error':
 		pass #do something you filthy shit
 	if data['action'] == 'ids':
@@ -81,10 +72,6 @@ func _on_data():
 		player.connect("moveplayer", self, "_moveplayer")
 		player.connect("shoot", self, "_shoot")
 		player.connect("knife", self, "_knife")
-	if data['action'] == 'login':
-		print(data)
-		if data['state'] == 'found':
-			$login.hide()
 func _process(delta):
 	_client.poll()
 
@@ -94,27 +81,6 @@ func _moveplayer(x,y,vx,vy,rot):
 		var data = JSON.print({"action":"move","pID":playerID,'x':x, 'y':y,'vx':vx, 'vy':vy, 'rot':rot}).to_utf8()
 		_client.get_peer(1).put_packet(data)
 
-func _shoot(ray):
-	var playerID = player.getID()
-	var other = null
-	for i in players: if players[i] == ray: other = i
-	if playerID != null and other !=null:
-		print(playerID+" hit "+other)
-		var data = JSON.print({"action":"bullet","pID":playerID}).to_utf8()
-		_client.get_peer(1).put_packet(data)
-
-func _knife(ray):
-	var playerID = player.getID()
-	var other = null
-	for i in players: if players[i] == ray: other = i
-	if playerID != null and other != null:
-		var p1pos = player.getpos()
-		var p2pos = other.getpos()
-		print(p1pos.distance_to(p2pos))
-		print(playerID+" hit "+other)
-		var data = JSON.print({"action":"knife","pID":playerID}).to_utf8()
-		_client.get_peer(1).put_packet(data)
-
 func _on_play_pressed():
 	if len($GUI/players.text) > 0:
 		var data = JSON.print({"action":"play","pID":pID,"party":"1",'x':0, 'y':0, 'rot':0,'code':code}).to_utf8()
@@ -122,29 +88,3 @@ func _on_play_pressed():
 	else:
 		var data = JSON.print({"action":"play","pID":pID,"party":"0",'x':0, 'y':0, 'rot':0,'code':code}).to_utf8()
 		_client.get_peer(1).put_packet(data)
-
-func _on_create_party_pressed():
-	var rng = RandomNumberGenerator.new()
-	rng.randomize()
-	code = ""
-	var alph = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1','2','3','4','5','6','7','8','9','0']
-	for i in range(4):
-		var r = rng.randi_range(0, 35)
-		code += alph[r]
-	var data = JSON.print({"action":"create","pID":pID,"code":code}).to_utf8()
-	_client.get_peer(1).put_packet(data)
-	$GUI/join_party.hide()
-	$GUI/party_code.hide()
-	$GUI/created_party_code.text = code
-	$GUI/created_party_code.show()
-	$GUI/create_party.hide()
-
-func _on_join_party_pressed():
-	var data = JSON.print({"action":"join","pID":pID,"code":$GUI/party_code.text}).to_utf8()
-	_client.get_peer(1).put_packet(data)
-	$GUI/join_party.hide()
-	$GUI/party_code.hide()
-	$GUI/created_party_code.text = $GUI/party_code.text
-	$GUI/created_party_code.show()
-	$GUI/create_party.hide()
-	$GUI/Play.hide()

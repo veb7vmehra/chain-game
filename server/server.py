@@ -78,12 +78,14 @@ async def register(ws, message):
 
 async def move_state(data):
     pid = data['pID']
-    data = json.dumps(data)
     users = []
     for key in rooms[data["room"]].keys():
         if key != "participants" and key != data["pID"]:
             users.append(key)
-    await asyncio.wait([all_user[user]['ws'].send(data) for user in all_user if user in users])
+    data = json.dumps(data)
+    temp = [all_user[user]['ws'].send(data) for user in all_user if user in users]
+    if len(temp) > 0:
+        await asyncio.wait(temp)
 
 async def respawn(data):
     d = {"action": "respawn"}

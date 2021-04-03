@@ -5,7 +5,7 @@
 With no one having control over the universal ledger, blockchain comes out to be the most trustable and free of any dominant centralised organisation like in fiat currencies and other information sharing platforms.
 
 ## Problem and Solution
-**Blockchain** is the technology of tomorrow, though it’s popularity after Bitcoin has seen a substantial rise, still **most of the people don’t know what a blockchain is** and how it works.
+**Blockchain** is the technology of tomorrow, though it’s popularity after Bitcoin has seen a substantial rise, still most of the people don’t know what a blockchain is and how it works.
 ---
 We came up with a solution, New and effective, **The BlockChain Game**. It is a 5v5 character based multiplayer 2D top down game. The game focuses on aspects like mining and rewards, universal ledger, value of the currencies, e.t.c. 
 With the final goal being to make most blocks in the blockchain.
